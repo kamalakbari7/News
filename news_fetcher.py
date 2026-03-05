@@ -133,7 +133,7 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
         from backports.zoneinfo import ZoneInfo
 
     tz = ZoneInfo(TIMEZONE)
-    from_dt = (datetime.now(tz) - timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M:%S")
+    from_dt = (datetime.now(tz) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%S")
 
     results = {}
     seen_urls = set()
