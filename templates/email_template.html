@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ topic_name }} - News Digest</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f5f7; padding: 24px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="max-width: 680px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 32px 32px 28px 32px;">
+                            <h1 style="margin: 0 0 8px 0; font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">{{ topic_name }}</h1>
+                            <p style="margin: 0; font-size: 14px; color: #a0aec0;">News Digest &middot; {{ generated_at }}</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 8px 0;">
+                            {% for perspective, articles in perspectives.items() %}
+                            {% if articles %}
+                            <!-- Perspective Section: {{ perspective }} -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="padding: 24px 32px 12px 32px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="border-left: 4px solid {{ perspective_colors[perspective] }}; padding-left: 12px;">
+                                                    <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #2d3748; text-transform: uppercase; letter-spacing: 0.5px;">{{ perspective }}</h2>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                {% for article in articles %}
+                                <tr>
+                                    <td style="padding: 12px 32px 12px 48px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom: 1px solid #edf2f7; padding-bottom: 16px;">
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ article.url }}" style="text-decoration: none; color: #1a1a2e; font-size: 17px; font-weight: 600; line-height: 1.4; display: block; margin-bottom: 6px;">{{ article.title }}</a>
+                                                    <p style="margin: 0 0 10px 0; font-size: 13px; color: #888888;">{{ article.source }} &middot; {{ article.published_at }}</p>
+                                                    <p style="margin: 0 0 12px 0; font-size: 15px; color: #333333; line-height: 1.6;">{{ article.summary }}</p>
+                                                    <a href="{{ article.url }}" style="font-size: 13px; color: #e94560; text-decoration: none; font-weight: 600;">Read Full Article &rarr;</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if not has_articles %}
+                            <tr>
+                                <td style="padding: 40px 32px; text-align: center;">
+                                    <p style="margin: 0; font-size: 15px; color: #888888;">No articles found for this topic in the last 6 hours.</p>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 32px; border-top: 1px solid #edf2f7;">
+                            <p style="margin: 0; font-size: 12px; color: #a0aec0; text-align: center;">Generated by News Agent &middot; Powered by NewsAPI &amp; OpenAI</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

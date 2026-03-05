@@ -1,0 +1,7 @@
+services:
+  news-agent:
+    build: .
+    env_file: .env
+    volumes:
+      - ./logs:/app/logs
+    restart: "no"

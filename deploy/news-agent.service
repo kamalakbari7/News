@@ -1,0 +1,14 @@
+[Unit]
+Description=News Agent - Fetch, Summarize, Email News
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/newsagent/news-agent
+ExecStart=/usr/bin/docker compose run --rm news-agent
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
