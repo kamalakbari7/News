@@ -77,6 +77,8 @@ SOURCE_PERSPECTIVES = {
     ],
 }
 
+OTHER_PERSPECTIVE = "Other Sources"
+
 # OpenAI
 OPENAI_MODEL = "gpt-4o-mini"
 MAX_SUMMARY_TOKENS = 200

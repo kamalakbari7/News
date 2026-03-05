@@ -3,7 +3,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from news_fetcher import _is_safe_url, fetch_articles, _fetch_from_domains
+from news_fetcher import (
+    _is_safe_url, _classify_perspective, _fetch_from_domains,
+    _fetch_from_google_news_rss, fetch_articles,
+)
 
 
 SAMPLE_NEWSAPI_RESPONSE = {
@@ -58,6 +61,29 @@ class TestIsSafeUrl:
         assert _is_safe_url("ftp://example.com/file") is False
 
 
+class TestClassifyPerspective:
+    def test_neutral_domain(self):
+        assert _classify_perspective("https://reuters.com/article/123") == "Neutral"
+
+    def test_left_leaning_domain(self):
+        assert _classify_perspective("https://cnn.com/news/story") == "Left-Leaning"
+
+    def test_right_leaning_domain(self):
+        assert _classify_perspective("https://foxnews.com/politics") == "Right-Leaning"
+
+    def test_www_prefix_stripped(self):
+        assert _classify_perspective("https://www.reuters.com/article") == "Neutral"
+
+    def test_subdomain_matching(self):
+        assert _classify_perspective("https://edition.cnn.com/story") == "Left-Leaning"
+
+    def test_unknown_domain_returns_other(self):
+        assert _classify_perspective("https://unknownnews.com/article") == "Other Sources"
+
+    def test_empty_url_returns_other(self):
+        assert _classify_perspective("") == "Other Sources"
+
+
 class TestFetchFromDomains:
     @patch("news_fetcher.requests.get")
     def test_successful_fetch(self, mock_get):
@@ -106,9 +132,75 @@ class TestFetchFromDomains:
         assert result == []
 
 
+class TestFetchFromGoogleNewsRss:
+    @patch("news_fetcher.feedparser.parse")
+    def test_successful_rss_fetch(self, mock_parse):
+        mock_parse.return_value = MagicMock(
+            bozo=False,
+            entries=[
+                MagicMock(
+                    title="RSS Article 1",
+                    link="https://reuters.com/rss-article",
+                    summary="RSS summary",
+                    published="Mon, 04 Mar 2026 10:00:00 GMT",
+                    source={"title": "Reuters"},
+                    **{"get": lambda k, d=None: {"title": "RSS Article 1", "link": "https://reuters.com/rss-article", "summary": "RSS summary", "published": "Mon, 04 Mar 2026 10:00:00 GMT"}.get(k, d)},
+                ),
+            ],
+        )
+        # Simpler approach: use a dict-like entry
+        mock_entry = MagicMock()
+        mock_entry.get.side_effect = lambda k, d=None: {
+            "title": "RSS Article 1",
+            "link": "https://reuters.com/rss-article",
+            "summary": "RSS summary",
+            "published": "Mon, 04 Mar 2026 10:00:00 GMT",
+            "source": {"title": "Reuters"},
+        }.get(k, d)
+        mock_parse.return_value = MagicMock(bozo=False, entries=[mock_entry])
+
+        result = _fetch_from_google_news_rss("test", 5)
+        assert len(result) == 1
+        assert result[0]["title"] == "RSS Article 1"
+        assert result[0]["url"] == "https://reuters.com/rss-article"
+
+    @patch("news_fetcher.feedparser.parse")
+    def test_rss_parse_error_returns_empty(self, mock_parse):
+        mock_parse.return_value = MagicMock(bozo=True, entries=[], bozo_exception="XML error")
+
+        result = _fetch_from_google_news_rss("test", 5)
+        assert result == []
+
+    @patch("news_fetcher.feedparser.parse")
+    def test_rss_exception_returns_empty(self, mock_parse):
+        mock_parse.side_effect = Exception("Network error")
+
+        result = _fetch_from_google_news_rss("test", 5)
+        assert result == []
+
+    @patch("news_fetcher.feedparser.parse")
+    def test_rss_respects_page_size(self, mock_parse):
+        entries = []
+        for i in range(10):
+            entry = MagicMock()
+            entry.get.side_effect = lambda k, d=None, i=i: {
+                "title": f"Article {i}",
+                "link": f"https://example.com/{i}",
+                "summary": f"Summary {i}",
+                "published": "",
+                "source": {"title": "Source"},
+            }.get(k, d)
+            entries.append(entry)
+        mock_parse.return_value = MagicMock(bozo=False, entries=entries)
+
+        result = _fetch_from_google_news_rss("test", 3)
+        assert len(result) == 3
+
+
 class TestFetchArticles:
+    @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_returns_perspectives(self, mock_fetch):
+    def test_returns_perspectives(self, mock_fetch, mock_rss):
         mock_fetch.return_value = SAMPLE_NEWSAPI_RESPONSE["articles"]
 
         result = fetch_articles(SAMPLE_TOPIC)
@@ -116,8 +208,9 @@ class TestFetchArticles:
         assert "Left-Leaning" in result
         assert "Right-Leaning" in result
 
+    @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_filters_removed_articles(self, mock_fetch):
+    def test_filters_removed_articles(self, mock_fetch, mock_rss):
         articles = [
             {"title": "[Removed]", "url": "https://example.com", "source": {"name": "X"}},
             {"title": "Good Article", "url": "https://example.com/good", "source": {"name": "Y"},
@@ -130,8 +223,9 @@ class TestFetchArticles:
             for a in perspective_articles:
                 assert a["title"] != "[Removed]"
 
+    @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_filters_unsafe_urls(self, mock_fetch):
+    def test_filters_unsafe_urls(self, mock_fetch, mock_rss):
         articles = [
             {"title": "Bad URL", "url": "javascript:alert(1)", "source": {"name": "X"},
              "description": "Desc", "content": "Content", "publishedAt": "2026-03-04"},
@@ -145,8 +239,9 @@ class TestFetchArticles:
             for a in perspective_articles:
                 assert a["title"] != "Bad URL"
 
+    @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_article_structure(self, mock_fetch):
+    def test_article_structure(self, mock_fetch, mock_rss):
         mock_fetch.return_value = SAMPLE_NEWSAPI_RESPONSE["articles"]
 
         result = fetch_articles(SAMPLE_TOPIC)
@@ -159,3 +254,40 @@ class TestFetchArticles:
         assert "published_at" in article
         assert "perspective" in article
         assert article["perspective"] == "Neutral"
+
+    @patch("news_fetcher._fetch_from_google_news_rss")
+    @patch("news_fetcher._fetch_from_domains", return_value=[])
+    def test_rss_articles_classified_by_domain(self, mock_fetch, mock_rss):
+        mock_rss.return_value = [
+            {"title": "Reuters RSS", "url": "https://reuters.com/rss1",
+             "source": {"name": "Reuters"}, "description": "D", "content": "C", "publishedAt": ""},
+            {"title": "Unknown RSS", "url": "https://unknownnews.org/rss2",
+             "source": {"name": "Unknown"}, "description": "D", "content": "C", "publishedAt": ""},
+        ]
+
+        result = fetch_articles(SAMPLE_TOPIC)
+        # Reuters should go to Neutral
+        neutral_titles = [a["title"] for a in result.get("Neutral", [])]
+        assert "Reuters RSS" in neutral_titles
+        # Unknown should go to Other Sources
+        other_titles = [a["title"] for a in result.get("Other Sources", [])]
+        assert "Unknown RSS" in other_titles
+
+    @patch("news_fetcher._fetch_from_google_news_rss")
+    @patch("news_fetcher._fetch_from_domains")
+    def test_deduplication_by_url(self, mock_fetch, mock_rss):
+        # Same URL from both NewsAPI and RSS
+        mock_fetch.return_value = [
+            {"title": "NewsAPI Article", "url": "https://reuters.com/same-article",
+             "source": {"name": "Reuters"}, "description": "D", "content": "C", "publishedAt": ""},
+        ]
+        mock_rss.return_value = [
+            {"title": "RSS Article", "url": "https://reuters.com/same-article",
+             "source": {"name": "Reuters"}, "description": "D", "content": "C", "publishedAt": ""},
+        ]
+
+        result = fetch_articles(SAMPLE_TOPIC)
+        all_urls = []
+        for articles in result.values():
+            all_urls.extend(a["url"] for a in articles)
+        assert all_urls.count("https://reuters.com/same-article") == 1

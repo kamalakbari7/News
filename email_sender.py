@@ -16,6 +16,7 @@ PERSPECTIVE_COLORS = {
     "Neutral": "#718096",
     "Left-Leaning": "#3182ce",
     "Right-Leaning": "#e53e3e",
+    "Other Sources": "#805ad5",
 }
 
 
