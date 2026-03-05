@@ -88,3 +88,17 @@ class TestSendEmail:
         sendmail_args = mock_server.sendmail.call_args[0]
         message_str = sendmail_args[2]
         assert "Iran News Digest" in message_str
+
+    @patch("email_sender.smtplib.SMTP")
+    def test_custom_recipients(self, mock_smtp_class):
+        mock_server = MagicMock()
+        mock_smtp_class.return_value.__enter__ = MagicMock(return_value=mock_server)
+        mock_smtp_class.return_value.__exit__ = MagicMock(return_value=False)
+
+        custom = ["a@example.com", "b@example.com"]
+        send_email("Test", "<h1>Test</h1>", recipients=custom)
+
+        sendmail_args = mock_server.sendmail.call_args[0]
+        assert sendmail_args[1] == custom
+        message_str = sendmail_args[2]
+        assert "a@example.com, b@example.com" in message_str

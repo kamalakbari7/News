@@ -32,7 +32,10 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 # Email
 GMAIL_ADDRESS = os.environ["GMAIL_ADDRESS"]
 GMAIL_APP_PASSWORD = os.environ["GMAIL_APP_PASSWORD"]
-EMAIL_RECIPIENT = os.environ.get("EMAIL_RECIPIENT", GMAIL_ADDRESS)
+EMAIL_RECIPIENT = [
+    addr.strip()
+    for addr in os.environ.get("EMAIL_RECIPIENT", GMAIL_ADDRESS).split(",")
+]
 
 # Topics
 TOPICS = [
@@ -44,8 +47,29 @@ TOPICS = [
         "page_size": 5,
     },
     {
-        "name": "Data Science, GIS & Remote Sensing",
-        "query": "Data Science OR GIS OR Remote Sensing",
+        "name": "GIS, Remote Sensing & Earth Science",
+        "query": "GIS OR Remote Sensing OR Earth Science",
+        "sort_by": "popularity",
+        "language": "en",
+        "page_size": 5,
+    },
+    {
+        "name": "Data Science & Machine Learning",
+        "query": "Data Science OR Machine Learning",
+        "sort_by": "popularity",
+        "language": "en",
+        "page_size": 5,
+    },
+    {
+        "name": "AI",
+        "query": "Artificial Intelligence OR AI",
+        "sort_by": "popularity",
+        "language": "en",
+        "page_size": 5,
+    },
+    {
+        "name": "Football",
+        "query": "Football OR Soccer OR Premier League OR Champions League",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 5,
@@ -74,6 +98,16 @@ SOURCE_PERSPECTIVES = {
         "dailywire.com",
         "washingtontimes.com",
         "nationalreview.com",
+    ],
+    "International": [
+        "aljazeera.com",
+        "bloomberg.com",
+    ],
+    "Tech": [
+        "techcrunch.com",
+        "wired.com",
+        "arstechnica.com",
+        "news.ycombinator.com",
     ],
 }
 

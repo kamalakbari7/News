@@ -198,9 +198,10 @@ class TestFetchFromGoogleNewsRss:
 
 
 class TestFetchArticles:
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_returns_perspectives(self, mock_fetch, mock_rss):
+    def test_returns_perspectives(self, mock_fetch, mock_rss, mock_web):
         mock_fetch.return_value = SAMPLE_NEWSAPI_RESPONSE["articles"]
 
         result = fetch_articles(SAMPLE_TOPIC)
@@ -208,9 +209,10 @@ class TestFetchArticles:
         assert "Left-Leaning" in result
         assert "Right-Leaning" in result
 
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_filters_removed_articles(self, mock_fetch, mock_rss):
+    def test_filters_removed_articles(self, mock_fetch, mock_rss, mock_web):
         articles = [
             {"title": "[Removed]", "url": "https://example.com", "source": {"name": "X"}},
             {"title": "Good Article", "url": "https://example.com/good", "source": {"name": "Y"},
@@ -223,9 +225,10 @@ class TestFetchArticles:
             for a in perspective_articles:
                 assert a["title"] != "[Removed]"
 
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_filters_unsafe_urls(self, mock_fetch, mock_rss):
+    def test_filters_unsafe_urls(self, mock_fetch, mock_rss, mock_web):
         articles = [
             {"title": "Bad URL", "url": "javascript:alert(1)", "source": {"name": "X"},
              "description": "Desc", "content": "Content", "publishedAt": "2026-03-04"},
@@ -239,9 +242,10 @@ class TestFetchArticles:
             for a in perspective_articles:
                 assert a["title"] != "Bad URL"
 
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss", return_value=[])
     @patch("news_fetcher._fetch_from_domains")
-    def test_article_structure(self, mock_fetch, mock_rss):
+    def test_article_structure(self, mock_fetch, mock_rss, mock_web):
         mock_fetch.return_value = SAMPLE_NEWSAPI_RESPONSE["articles"]
 
         result = fetch_articles(SAMPLE_TOPIC)
@@ -255,9 +259,10 @@ class TestFetchArticles:
         assert "perspective" in article
         assert article["perspective"] == "Neutral"
 
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss")
     @patch("news_fetcher._fetch_from_domains", return_value=[])
-    def test_rss_articles_classified_by_domain(self, mock_fetch, mock_rss):
+    def test_rss_articles_classified_by_domain(self, mock_fetch, mock_rss, mock_web):
         mock_rss.return_value = [
             {"title": "Reuters RSS", "url": "https://reuters.com/rss1",
              "source": {"name": "Reuters"}, "description": "D", "content": "C", "publishedAt": ""},
@@ -273,9 +278,10 @@ class TestFetchArticles:
         other_titles = [a["title"] for a in result.get("Other Sources", [])]
         assert "Unknown RSS" in other_titles
 
+    @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss")
     @patch("news_fetcher._fetch_from_domains")
-    def test_deduplication_by_url(self, mock_fetch, mock_rss):
+    def test_deduplication_by_url(self, mock_fetch, mock_rss, mock_web):
         # Same URL from both NewsAPI and RSS
         mock_fetch.return_value = [
             {"title": "NewsAPI Article", "url": "https://reuters.com/same-article",

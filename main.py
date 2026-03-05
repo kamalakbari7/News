@@ -72,7 +72,7 @@ def run(dry_run: bool = False):
             logger.info("Dry run: HTML saved to %s", output_file)
         else:
             try:
-                send_email(subject, html)
+                send_email(subject, html, recipients=topic.get("recipients"))
             except Exception as e:
                 logger.error("Failed to send email for topic '%s': %s",
                              topic["name"], e, exc_info=True)

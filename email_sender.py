@@ -17,6 +17,8 @@ PERSPECTIVE_COLORS = {
     "Left-Leaning": "#3182ce",
     "Right-Leaning": "#e53e3e",
     "Other Sources": "#805ad5",
+    "International": "#2b6cb0",
+    "Tech": "#38a169",
 }
 
 
@@ -37,11 +39,12 @@ def build_email_html(topic_name: str, perspectives: dict[str, list[dict]],
     )
 
 
-def send_email(subject: str, html_body: str) -> None:
+def send_email(subject: str, html_body: str, recipients=None) -> None:
     """Send an HTML email via Gmail SMTP."""
+    to_list = recipients or EMAIL_RECIPIENT
     msg = MIMEMultipart("alternative")
     msg["From"] = GMAIL_ADDRESS
-    msg["To"] = EMAIL_RECIPIENT
+    msg["To"] = ", ".join(to_list)
     msg["Subject"] = subject
 
     msg.attach(MIMEText(html_body, "html"))
@@ -49,6 +52,6 @@ def send_email(subject: str, html_body: str) -> None:
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
         server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-        server.sendmail(GMAIL_ADDRESS, EMAIL_RECIPIENT, msg.as_string())
+        server.sendmail(GMAIL_ADDRESS, to_list, msg.as_string())
 
     logger.info("Email sent: %s", subject)

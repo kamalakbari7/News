@@ -201,4 +201,35 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
     logger.info("Added %d unique articles from Google News RSS for topic='%s'",
                 rss_count, topic["name"])
 
+    # Fetch from web sources (RSS feeds + Hacker News API)
+    from web_scraper import fetch_from_web_sources
+
+    web_articles = fetch_from_web_sources(topic["query"], max_per_site=topic["page_size"])
+    web_count = 0
+    for a in web_articles:
+        url = a.get("url", "")
+        if not url or not _is_safe_url(url):
+            continue
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        perspective = _classify_perspective(url)
+        if perspective not in results:
+            results[perspective] = []
+
+        results[perspective].append({
+            "title": a.get("title", "No Title"),
+            "source": a.get("source", {}).get("name", "Unknown"),
+            "url": url,
+            "description": a.get("description", ""),
+            "content": a.get("content", a.get("description", "")),
+            "published_at": a.get("publishedAt", ""),
+            "perspective": perspective,
+        })
+        web_count += 1
+
+    logger.info("Added %d unique articles from web sources for topic='%s'",
+                web_count, topic["name"])
+
     return results

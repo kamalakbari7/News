@@ -39,8 +39,8 @@ class TestRun:
         from main import run
         run(dry_run=False)
 
-        # 2 topics = 2 emails
-        assert mock_send.call_count == 2
+        # 5 topics = 5 emails
+        assert mock_send.call_count == 5
 
     @patch("main.send_email")
     @patch("main.build_email_html", return_value="<html>test</html>")
@@ -75,7 +75,7 @@ class TestRun:
         mock_send.assert_not_called()
         # Should have created HTML files
         html_files = list(tmp_path.glob("*.html"))
-        assert len(html_files) == 2
+        assert len(html_files) == 5
 
     @patch("main.send_email")
     @patch("main.build_email_html", return_value="<html>test</html>")
@@ -88,9 +88,9 @@ class TestRun:
         from main import run
         run(dry_run=False)
 
-        # 1 article per perspective group per topic, 2 topics
-        # Neutral has 1 article, others empty = 1 article per topic = 2 total
-        assert mock_summarize.call_count == 2
+        # 1 article per perspective group per topic, 5 topics
+        # Neutral has 1 article, others empty = 1 article per topic = 5 total
+        assert mock_summarize.call_count == 5
 
     @patch("main.send_email")
     @patch("main.build_email_html", return_value="<html>test</html>")
