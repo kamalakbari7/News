@@ -47,8 +47,8 @@ TOPICS = [
         "page_size": 20,
     },
     {
-        "name": "GIS, Remote Sensing & Earth Science",
-        "query": "GIS OR Remote Sensing OR Earth Science",
+        "name": "Geospatial Information Systems, Remote Sensing & Earth Science",
+        "query": "Geospatial Information Systems OR Remote Sensing OR Earth Science OR GIS",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,
@@ -62,7 +62,7 @@ TOPICS = [
     },
     {
         "name": "Artificial Intelligence",
-        "query": "Artificial Intelligence OR AI",
+        "query": "Artificial Intelligence OR ChatGPT OR Large Language Model OR Generative AI OR OpenAI OR Machine Intelligence",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,
