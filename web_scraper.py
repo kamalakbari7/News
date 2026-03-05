@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from urllib.parse import quote
 
 import feedparser
@@ -26,7 +27,7 @@ SITE_RSS_FEEDS = {
     ],
 }
 
-HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search"
+HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date"
 
 
 def _strip_html(text: str) -> str:
@@ -89,7 +90,12 @@ def _fetch_from_hacker_news(query: str, max_articles: int) -> list[dict]:
     try:
         resp = requests.get(
             HN_ALGOLIA_URL,
-            params={"query": query, "tags": "story", "hitsPerPage": max_articles},
+            params={
+                "query": query,
+                "tags": "story",
+                "hitsPerPage": max_articles,
+                "numericFilters": f"created_at_i>{int(time.time()) - 2 * 86400}",
+            },
             timeout=15,
         )
         resp.raise_for_status()
