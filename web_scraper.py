@@ -29,6 +29,22 @@ SITE_RSS_FEEDS = {
 
 HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date"
 
+# Topic-specific RSS feeds — only fetched when query keywords match
+TOPIC_RSS_FEEDS = {
+    "geospatial|remote sensing|earth science|gis": [
+        ("OSGeo", "https://www.osgeo.org/community-news/feed/"),
+        ("Esri Canada", "https://resources.esri.ca/news-and-updates.rss"),
+        ("Esri Canada", "https://resources.esri.ca/getting-technical.rss"),
+    ],
+}
+
+# Topic-specific Google News site searches (for sites that block direct scraping)
+TOPIC_GOOGLE_NEWS_SITES = {
+    "geospatial|remote sensing|earth science|gis": [
+        ("Esri ArcNews", "site:esri.com/about/newsroom/arcnews"),
+    ],
+}
+
 
 def _strip_html(text: str) -> str:
     """Remove HTML tags from text."""
@@ -122,6 +138,87 @@ def _fetch_from_hacker_news(query: str, max_articles: int) -> list[dict]:
     return articles
 
 
+def _query_matches_topic_feeds(query: str) -> list[tuple]:
+    """Return topic-specific feed entries if query keywords match."""
+    query_lower = query.lower()
+    matched_feeds = []
+    for keywords, feeds in TOPIC_RSS_FEEDS.items():
+        if any(kw in query_lower for kw in keywords.split("|")):
+            matched_feeds.extend(feeds)
+    return matched_feeds
+
+
+def _query_matches_google_news_sites(query: str) -> list[tuple]:
+    """Return topic-specific Google News site searches if query keywords match."""
+    query_lower = query.lower()
+    matched = []
+    for keywords, sites in TOPIC_GOOGLE_NEWS_SITES.items():
+        if any(kw in query_lower for kw in keywords.split("|")):
+            matched.extend(sites)
+    return matched
+
+
+def _fetch_google_news_site(source_name: str, site_query: str, max_articles: int) -> list[dict]:
+    """Fetch articles from a specific site via Google News RSS search."""
+    encoded = quote(site_query)
+    url = f"https://news.google.com/rss/search?q={encoded}&hl=en&gl=US&ceid=US:en"
+
+    try:
+        feed = feedparser.parse(url)
+        if feed.bozo and not feed.entries:
+            logger.warning("Google News RSS error for %s: %s", source_name, feed.bozo_exception)
+            return []
+    except Exception as e:
+        logger.warning("Google News RSS fetch failed for %s: %s", source_name, e)
+        return []
+
+    articles = []
+    for entry in feed.entries[:max_articles]:
+        title = entry.get("title", "")
+        # Google News titles often end with " - Source Name", clean it
+        if " - " in title:
+            title = title.rsplit(" - ", 1)[0]
+        articles.append({
+            "title": title or "No Title",
+            "source": {"name": source_name},
+            "url": entry.get("link", ""),
+            "description": _strip_html(entry.get("summary", "")),
+            "content": _strip_html(entry.get("summary", "")),
+            "publishedAt": entry.get("published", ""),
+        })
+
+    return articles
+
+
+def _fetch_topic_rss(source_name: str, feed_url: str, query: str, max_articles: int) -> list[dict]:
+    """Fetch and filter a single RSS feed for topic-specific sources."""
+    try:
+        feed = feedparser.parse(feed_url)
+        if feed.bozo and not feed.entries:
+            logger.warning("RSS parse error for %s: %s", feed_url, feed.bozo_exception)
+            return []
+    except Exception as e:
+        logger.warning("RSS fetch failed for %s: %s", feed_url, e)
+        return []
+
+    articles = []
+    for entry in feed.entries:
+        title = entry.get("title", "")
+        summary = _strip_html(entry.get("summary", ""))
+        articles.append({
+            "title": title or "No Title",
+            "source": {"name": source_name},
+            "url": entry.get("link", ""),
+            "description": summary,
+            "content": summary,
+            "publishedAt": entry.get("published", ""),
+        })
+        if len(articles) >= max_articles:
+            break
+
+    return articles
+
+
 def fetch_from_web_sources(query: str, max_per_site: int = 5) -> list[dict]:
     """Fetch articles from RSS feeds and Hacker News API.
 
@@ -136,6 +233,24 @@ def fetch_from_web_sources(query: str, max_per_site: int = 5) -> list[dict]:
             logger.info("Fetched %d articles from %s RSS", len(articles), domain)
         except Exception as e:
             logger.warning("Failed to fetch from %s: %s", domain, e)
+
+    # Topic-specific feeds (e.g. GIS sites for geospatial queries)
+    for source_name, feed_url in _query_matches_topic_feeds(query):
+        try:
+            articles = _fetch_topic_rss(source_name, feed_url, query, max_per_site)
+            all_articles.extend(articles)
+            logger.info("Fetched %d articles from %s RSS", len(articles), source_name)
+        except Exception as e:
+            logger.warning("Failed to fetch from %s: %s", source_name, e)
+
+    # Topic-specific Google News site searches (for sites that block scraping)
+    for source_name, site_query in _query_matches_google_news_sites(query):
+        try:
+            articles = _fetch_google_news_site(source_name, site_query, max_per_site)
+            all_articles.extend(articles)
+            logger.info("Fetched %d articles from %s (Google News)", len(articles), source_name)
+        except Exception as e:
+            logger.warning("Failed to fetch from %s: %s", source_name, e)
 
     try:
         hn_articles = _fetch_from_hacker_news(query, max_per_site)

@@ -5,7 +5,7 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/newsagent/news-agent
+WorkingDirectory=/root/News
 ExecStart=/usr/bin/docker compose run --rm news-agent
 StandardOutput=journal
 StandardError=journal
