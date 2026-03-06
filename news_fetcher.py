@@ -215,6 +215,10 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
         seen_urls.add(url)
 
         perspective = _classify_perspective(url)
+        # Use domain_hint for Google News redirect URLs
+        if perspective == OTHER_PERSPECTIVE and a.get("domain_hint"):
+            hint_url = f"https://{a['domain_hint']}/"
+            perspective = _classify_perspective(hint_url)
         if perspective not in results:
             results[perspective] = []
 

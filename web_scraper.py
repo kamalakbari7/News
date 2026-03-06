@@ -163,6 +163,12 @@ def _fetch_google_news_site(source_name: str, site_query: str, max_articles: int
     encoded = quote(site_query)
     url = f"https://news.google.com/rss/search?q={encoded}&hl=en&gl=US&ceid=US:en"
 
+    # Extract actual domain from site query (e.g. "site:esri.com/about/..." -> "esri.com")
+    domain_hint = ""
+    if "site:" in site_query:
+        domain_part = site_query.split("site:", 1)[1].split()[0]
+        domain_hint = domain_part.split("/")[0]
+
     try:
         feed = feedparser.parse(url)
         if feed.bozo and not feed.entries:
@@ -182,6 +188,7 @@ def _fetch_google_news_site(source_name: str, site_query: str, max_articles: int
             "title": title or "No Title",
             "source": {"name": source_name},
             "url": entry.get("link", ""),
+            "domain_hint": domain_hint,
             "description": _strip_html(entry.get("summary", "")),
             "content": _strip_html(entry.get("summary", "")),
             "publishedAt": entry.get("published", ""),
