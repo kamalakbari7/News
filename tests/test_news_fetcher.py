@@ -264,19 +264,19 @@ class TestFetchArticles:
     @patch("news_fetcher._fetch_from_domains", return_value=[])
     def test_rss_articles_classified_by_domain(self, mock_fetch, mock_rss, mock_web):
         mock_rss.return_value = [
-            {"title": "Reuters RSS", "url": "https://reuters.com/rss1",
+            {"title": "Reuters RSS test", "url": "https://reuters.com/rss1",
              "source": {"name": "Reuters"}, "description": "D", "content": "C", "publishedAt": ""},
-            {"title": "Unknown RSS", "url": "https://unknownnews.org/rss2",
+            {"title": "Unknown RSS test", "url": "https://unknownnews.org/rss2",
              "source": {"name": "Unknown"}, "description": "D", "content": "C", "publishedAt": ""},
         ]
 
         result = fetch_articles(SAMPLE_TOPIC)
         # Reuters should go to Neutral
         neutral_titles = [a["title"] for a in result.get("Neutral", [])]
-        assert "Reuters RSS" in neutral_titles
+        assert "Reuters RSS test" in neutral_titles
         # Unknown should go to Other Sources
         other_titles = [a["title"] for a in result.get("Other Sources", [])]
-        assert "Unknown RSS" in other_titles
+        assert "Unknown RSS test" in other_titles
 
     @patch("web_scraper.fetch_from_web_sources", return_value=[])
     @patch("news_fetcher._fetch_from_google_news_rss")

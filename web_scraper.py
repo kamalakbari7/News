@@ -81,13 +81,23 @@ def _matches_topic(text: str, query: str) -> bool:
     """Check if text matches any keyword from the query.
 
     Query can contain OR-separated terms, e.g. "Data Science OR Machine Learning".
-    Each term is matched as a whole (case-insensitive).
+    Short terms (<=4 chars) use word-boundary matching to avoid false positives
+    (e.g. "GIS" should not match "logistics").
     """
     if not text:
         return False
     text_lower = text.lower()
     terms = [t.strip().lower() for t in query.split(" OR ")]
-    return any(term in text_lower for term in terms if term)
+    for term in terms:
+        if not term:
+            continue
+        if len(term) <= 4:
+            if re.search(r"\b" + re.escape(term) + r"\b", text_lower):
+                return True
+        else:
+            if term in text_lower:
+                return True
+    return False
 
 
 def _fetch_rss_for_site(domain: str, query: str, max_articles: int) -> list[dict]:

@@ -48,7 +48,7 @@ TOPICS = [
     },
     {
         "name": "Geospatial Information Systems, Remote Sensing & Earth Science",
-        "query": "Geospatial Information Systems OR Remote Sensing OR Earth Science OR GIS",
+        "query": "Geospatial Information Systems OR Remote Sensing OR Earth Science OR GIS OR ArcGIS OR QGIS",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,

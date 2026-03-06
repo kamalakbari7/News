@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, quote
@@ -12,6 +13,24 @@ logger = logging.getLogger(__name__)
 
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search?q={query}&hl=en&gl=US&ceid=US:en"
+
+
+def _matches_query(text: str, query: str) -> bool:
+    """Check if text matches any term from the query (word-boundary for short terms)."""
+    if not text:
+        return False
+    text_lower = text.lower()
+    terms = [t.strip().lower() for t in query.split(" OR ")]
+    for term in terms:
+        if not term:
+            continue
+        if len(term) <= 4:
+            if re.search(r"\b" + re.escape(term) + r"\b", text_lower):
+                return True
+        else:
+            if term in text_lower:
+                return True
+    return False
 
 
 def _is_safe_url(url: str) -> bool:
@@ -181,12 +200,18 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
                      len(articles), topic["name"], perspective)
 
     # Fetch from Google News RSS
-    rss_articles = _fetch_from_google_news_rss(topic["query"], topic["page_size"] * 3)
+    query = topic["query"]
+    rss_articles = _fetch_from_google_news_rss(query, topic["page_size"] * 3)
     for a in rss_articles:
         url = a.get("url", "")
         if not url or not _is_safe_url(url):
             continue
         if url in seen_urls:
+            continue
+        # Filter out irrelevant articles (Google News can return loosely related results)
+        title = a.get("title", "")
+        desc = a.get("description", "")
+        if not _matches_query(f"{title} {desc}", query):
             continue
         seen_urls.add(url)
 
