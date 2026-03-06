@@ -82,8 +82,12 @@ SOURCE_PERSPECTIVES = {
         "reuters.com",
         "apnews.com",
         "bbc.co.uk",
+        "bbc.com",
         "npr.org",
         "pbs.org",
+        "cbsnews.com",
+        "abcnews.go.com",
+        "nbcnews.com",
     ],
     "Left-Leaning": [
         "cnn.com",
@@ -91,6 +95,7 @@ SOURCE_PERSPECTIVES = {
         "msnbc.com",
         "nytimes.com",
         "washingtonpost.com",
+        "politico.com",
     ],
     "Right-Leaning": [
         "foxnews.com",
@@ -98,10 +103,12 @@ SOURCE_PERSPECTIVES = {
         "dailywire.com",
         "washingtontimes.com",
         "nationalreview.com",
+        "wsj.com",
     ],
     "International": [
         "aljazeera.com",
         "bloomberg.com",
+        "cnbc.com",
     ],
     "Tech": [
         "techcrunch.com",

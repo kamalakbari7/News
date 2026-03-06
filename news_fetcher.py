@@ -106,11 +106,18 @@ def _fetch_from_google_news_rss(query: str, page_size: int) -> list[dict]:
     articles = []
     for entry in feed.entries[:page_size]:
         # Google News RSS provides: title, link, published, source
-        source_name = entry.get("source", {}).get("title", "Unknown") if hasattr(entry.get("source", {}), "get") else "Unknown"
+        source_obj = entry.get("source", {})
+        if hasattr(source_obj, "get"):
+            source_name = source_obj.get("title", "Unknown")
+            source_url = source_obj.get("href", "")
+        else:
+            source_name = "Unknown"
+            source_url = ""
         articles.append({
             "title": entry.get("title", "No Title"),
             "source": {"name": source_name},
             "url": entry.get("link", ""),
+            "source_url": source_url,
             "description": entry.get("summary", ""),
             "content": entry.get("summary", ""),
             "publishedAt": entry.get("published", ""),
@@ -183,7 +190,9 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
             continue
         seen_urls.add(url)
 
-        perspective = _classify_perspective(url)
+        # Use source_url (publisher domain) for classification when available
+        source_url = a.get("source_url", "")
+        perspective = _classify_perspective(source_url) if source_url else _classify_perspective(url)
         if perspective not in results:
             results[perspective] = []
 
