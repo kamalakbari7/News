@@ -19,6 +19,7 @@ PERSPECTIVE_COLORS = {
     "Other Sources": "#805ad5",
     "International": "#2b6cb0",
     "Tech": "#38a169",
+    "GIS & Earth Science": "#d69e2e",
 }
 
 

@@ -109,6 +109,11 @@ SOURCE_PERSPECTIVES = {
         "arstechnica.com",
         "news.ycombinator.com",
     ],
+    "GIS & Earth Science": [
+        "osgeo.org",
+        "esri.com",
+        "resources.esri.ca",
+    ],
 }
 
 OTHER_PERSPECTIVE = "Other Sources"
