@@ -9,6 +9,31 @@ import requests
 logger = logging.getLogger(__name__)
 
 SITE_RSS_FEEDS = {
+    # Neutral
+    "bbc.co.uk": [
+        "https://feeds.bbci.co.uk/news/world/rss.xml",
+    ],
+    "npr.org": [
+        "https://feeds.npr.org/1001/rss.xml",
+    ],
+    # Left-Leaning
+    "cnn.com": [
+        "http://rss.cnn.com/rss/edition_world.rss",
+    ],
+    "nytimes.com": [
+        "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    ],
+    "theguardian.com": [
+        "https://www.theguardian.com/world/rss",
+    ],
+    "washingtonpost.com": [
+        "https://feeds.washingtonpost.com/rss/world",
+    ],
+    # Right-Leaning
+    "foxnews.com": [
+        "https://moxie.foxnews.com/google-publisher/world.xml",
+    ],
+    # International
     "aljazeera.com": [
         "https://www.aljazeera.com/xml/rss/all.xml",
     ],
@@ -16,6 +41,7 @@ SITE_RSS_FEEDS = {
         "https://feeds.bloomberg.com/markets/news.rss",
         "https://feeds.bloomberg.com/technology/news.rss",
     ],
+    # Tech
     "techcrunch.com": [
         "https://techcrunch.com/feed/",
     ],

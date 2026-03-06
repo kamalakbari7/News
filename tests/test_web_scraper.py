@@ -169,22 +169,22 @@ class TestFetchFromWebSources:
              "source": {"name": "Test"}, "description": "D", "content": "C", "publishedAt": ""},
         ]
 
+        from web_scraper import SITE_RSS_FEEDS
+        num_sites = len(SITE_RSS_FEEDS)
         result = fetch_from_web_sources("AI", max_per_site=5)
-        # One article per RSS site (5 sites) = 5 articles
-        assert len(result) == 5
-        assert mock_rss.call_count == 5
+        assert len(result) == num_sites
+        assert mock_rss.call_count == num_sites
 
     @patch("web_scraper._fetch_from_hacker_news")
     @patch("web_scraper._fetch_rss_for_site")
     def test_one_site_failure_doesnt_affect_others(self, mock_rss, mock_hn):
-        mock_rss.side_effect = [
-            Exception("Site 1 down"),
-            [{"title": "OK", "url": "https://example.com/ok",
-              "source": {"name": "Test"}, "description": "D", "content": "C", "publishedAt": ""}],
-            [],
-            [],
-            [],
-        ]
+        from web_scraper import SITE_RSS_FEEDS
+        num_sites = len(SITE_RSS_FEEDS)
+        side_effects = [Exception("Site 1 down")]
+        side_effects.append([{"title": "OK", "url": "https://example.com/ok",
+              "source": {"name": "Test"}, "description": "D", "content": "C", "publishedAt": ""}])
+        side_effects.extend([] for _ in range(num_sites - 2))
+        mock_rss.side_effect = side_effects
         mock_hn.return_value = []
 
         result = fetch_from_web_sources("AI", max_per_site=5)
