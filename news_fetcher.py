@@ -213,7 +213,7 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
     # Fetch from web sources (RSS feeds + Hacker News API)
     from web_scraper import fetch_from_web_sources
 
-    web_articles = fetch_from_web_sources(topic["query"], max_per_site=topic["page_size"])
+    web_articles = fetch_from_web_sources(topic["query"], max_per_site=5)
     web_count = 0
     for a in web_articles:
         url = a.get("url", "")
@@ -244,5 +244,20 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
 
     logger.info("Added %d unique articles from web sources for topic='%s'",
                 web_count, topic["name"])
+
+    # Cap articles per source to ensure diversity (max 3 per source per perspective)
+    max_per_source = 3
+    for perspective in results:
+        source_counts = {}
+        capped = []
+        for article in results[perspective]:
+            source = article.get("source", "Unknown")
+            source_counts[source] = source_counts.get(source, 0) + 1
+            if source_counts[source] <= max_per_source:
+                capped.append(article)
+        if len(capped) < len(results[perspective]):
+            logger.info("Capped %s from %d to %d articles (max %d per source)",
+                        perspective, len(results[perspective]), len(capped), max_per_source)
+        results[perspective] = capped
 
     return results
