@@ -1,8 +1,8 @@
 [Unit]
-Description=Run News Agent every 6 hours at Toronto time
+Description=Run News Agent twice daily at Toronto time
 
 [Timer]
-OnCalendar=*-*-* 00,06,12,18:00:00 America/Toronto
+OnCalendar=*-*-* 06,18:00:00 America/Toronto
 Persistent=true
 
 [Install]

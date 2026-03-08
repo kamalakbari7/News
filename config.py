@@ -48,7 +48,7 @@ TOPICS = [
     },
     {
         "name": "Geospatial Information Systems, Remote Sensing & Earth Science",
-        "query": "Geospatial Information Systems OR Remote Sensing OR Earth Science OR GIS OR ArcGIS OR QGIS",
+        "query": "Geospatial Information Systems OR Remote Sensing OR Earth Observation OR GIS OR ArcGIS OR QGIS OR PostGIS OR GeoServer OR Satellite Imagery",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,
@@ -120,6 +120,11 @@ SOURCE_PERSPECTIVES = {
         "osgeo.org",
         "esri.com",
         "resources.esri.ca",
+        "gisgeography.com",
+        "geospatialworld.net",
+        "xyht.com",
+        "earthobservatory.nasa.gov",
+        "qgis.org",
     ],
 }
 

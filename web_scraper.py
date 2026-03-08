@@ -57,17 +57,30 @@ HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date"
 
 # Topic-specific RSS feeds — only fetched when query keywords match
 TOPIC_RSS_FEEDS = {
-    "geospatial|remote sensing|earth science|gis": [
+    "geospatial|remote sensing|earth science|earth observation|gis|arcgis|qgis|postgis|satellite imagery": [
+        # Open Source GIS community
         ("OSGeo", "https://www.osgeo.org/community-news/feed/"),
+        ("Planet OSGeo", "https://planet.osgeo.org/rss20.xml"),
+        ("QGIS Blog", "https://blog.qgis.org/feed/"),
+        # GIS industry news
+        ("GIS Geography", "https://gisgeography.com/feed/"),
+        ("Geospatial World", "https://www.geospatialworld.net/feed/"),
+        ("xyHt", "https://www.xyht.com/feed/"),
+        # Earth observation
+        ("NASA Earth Observatory", "https://earthobservatory.nasa.gov/feeds/earth-observatory.rss"),
+        # Esri Canada
         ("Esri Canada", "https://resources.esri.ca/news-and-updates.rss"),
-        ("Esri Canada", "https://resources.esri.ca/getting-technical.rss"),
     ],
 }
 
 # Topic-specific Google News site searches (for sites that block direct scraping)
 TOPIC_GOOGLE_NEWS_SITES = {
-    "geospatial|remote sensing|earth science|gis": [
+    "geospatial|remote sensing|earth science|earth observation|gis|arcgis|qgis|postgis|satellite imagery": [
         ("Esri ArcNews", "site:esri.com/about/newsroom/arcnews"),
+        ("Esri Blog", "site:esri.com/arcgis-blog"),
+        ("Esri", 'Esri OR ArcGIS OR "ArcGIS Pro" OR "ArcGIS Online"'),
+        ("Open Source GIS", '"open source GIS" OR QGIS OR PostGIS OR GeoServer'),
+        ("Remote Sensing", '"remote sensing" OR "satellite imagery" OR "earth observation"'),
     ],
 }
 
