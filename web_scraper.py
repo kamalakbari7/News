@@ -82,6 +82,13 @@ TOPIC_GOOGLE_NEWS_SITES = {
         ("Open Source GIS", '"open source GIS" OR QGIS OR PostGIS OR GeoServer'),
         ("Remote Sensing", '"remote sensing" OR "satellite imagery" OR "earth observation"'),
     ],
+    "iran": [
+        ("Fox News Iran", "site:foxnews.com Iran"),
+        ("NY Post Iran", "site:nypost.com Iran"),
+        ("CNN Iran", "site:cnn.com Iran"),
+        ("Reuters Iran", "site:reuters.com Iran"),
+        ("Al Jazeera Iran", "site:aljazeera.com Iran"),
+    ],
 }
 
 
