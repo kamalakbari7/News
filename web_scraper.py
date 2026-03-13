@@ -1,6 +1,7 @@
 import logging
 import re
 import time
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 
 import feedparser
@@ -120,6 +121,19 @@ def _matches_topic(text: str, query: str) -> bool:
     return False
 
 
+def _is_recent(published_str: str, max_days: int = 7) -> bool:
+    """Return True if published date is within max_days of now."""
+    if not published_str:
+        return True
+    try:
+        from email.utils import parsedate_to_datetime
+        pub_dt = parsedate_to_datetime(published_str)
+        cutoff = datetime.now(pub_dt.tzinfo or timezone.utc) - timedelta(days=max_days)
+        return pub_dt >= cutoff
+    except Exception:
+        return True
+
+
 def _fetch_rss_for_site(domain: str, query: str, max_articles: int) -> list[dict]:
     """Fetch and filter RSS feed entries for a site."""
     feeds = SITE_RSS_FEEDS.get(domain, [])
@@ -140,6 +154,10 @@ def _fetch_rss_for_site(domain: str, query: str, max_articles: int) -> list[dict
             summary = _strip_html(entry.get("summary", ""))
 
             if not _matches_topic(f"{title} {summary}", query):
+                continue
+
+            published = entry.get("published", "")
+            if not _is_recent(published):
                 continue
 
             articles.append({
@@ -216,7 +234,7 @@ def _query_matches_google_news_sites(query: str) -> list[tuple]:
 
 def _fetch_google_news_site(source_name: str, site_query: str, max_articles: int) -> list[dict]:
     """Fetch articles from a specific site via Google News RSS search."""
-    encoded = quote(site_query)
+    encoded = quote(f"{site_query} when:7d")
     url = f"https://news.google.com/rss/search?q={encoded}&hl=en&gl=US&ceid=US:en"
 
     # Extract actual domain from site query (e.g. "site:esri.com/about/..." -> "esri.com")
@@ -268,6 +286,9 @@ def _fetch_topic_rss(source_name: str, feed_url: str, query: str, max_articles: 
     for entry in feed.entries:
         title = entry.get("title", "")
         summary = _strip_html(entry.get("summary", ""))
+        published = entry.get("published", "")
+        if not _is_recent(published):
+            continue
         articles.append({
             "title": title or "No Title",
             "source": {"name": source_name},
