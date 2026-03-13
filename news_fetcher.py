@@ -12,7 +12,7 @@ from config import NEWSAPI_KEY, OTHER_PERSPECTIVE, SOURCE_PERSPECTIVES, TIMEZONE
 logger = logging.getLogger(__name__)
 
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
-GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search?q={query}&hl=en&gl=US&ceid=US:en"
+GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search?q={query}+when:7d&hl=en&gl=US&ceid=US:en"
 
 
 def _matches_query(text: str, query: str) -> bool:

@@ -137,7 +137,7 @@ MAX_SUMMARY_TOKENS = 200
 # TTS / Podcast
 TTS_MODEL = "tts-1"
 TTS_VOICE_A = "alloy"
-TTS_VOICE_B = "nova"
+TTS_VOICE_B = "onyx"
 PODCAST_MAX_ARTICLES = 10
 
 # Scheduling

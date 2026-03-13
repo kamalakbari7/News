@@ -20,9 +20,9 @@ SAMPLE_ARTICLES = [
 ]
 
 SAMPLE_SCRIPT = [
-    {"speaker": "Host A", "text": "Welcome to today's news."},
-    {"speaker": "Host B", "text": "Let's discuss the top stories."},
-    {"speaker": "Host A", "text": "First up, article one."},
+    {"speaker": "Sarah", "text": "Welcome to today's news."},
+    {"speaker": "Mike", "text": "Let's discuss the top stories."},
+    {"speaker": "Sarah", "text": "First up, article one."},
 ]
 
 
@@ -38,8 +38,8 @@ class TestGenerateDiscussionScript:
         result = generate_discussion_script("Test Topic", SAMPLE_ARTICLES)
 
         assert len(result) == 3
-        assert result[0]["speaker"] == "Host A"
-        assert result[1]["speaker"] == "Host B"
+        assert result[0]["speaker"] == "Sarah"
+        assert result[1]["speaker"] == "Mike"
         mock_client.chat.completions.create.assert_called_once()
 
     @patch("audio_generator.client")
@@ -121,9 +121,9 @@ class TestGenerateAudio:
         generate_audio(SAMPLE_SCRIPT)
 
         calls = mock_client.audio.speech.create.call_args_list
-        assert calls[0].kwargs["voice"] == "alloy"   # Host A
-        assert calls[1].kwargs["voice"] == "nova"     # Host B
-        assert calls[2].kwargs["voice"] == "alloy"   # Host A
+        assert calls[0].kwargs["voice"] == "alloy"   # Sarah
+        assert calls[1].kwargs["voice"] == "onyx"     # Mike
+        assert calls[2].kwargs["voice"] == "alloy"   # Sarah
 
     @patch("audio_generator.client")
     def test_empty_segments_returns_empty(self, mock_client):
