@@ -55,7 +55,7 @@ TOPICS = [
     },
     {
         "name": "Data Science or Machine Learning",
-        "query": "Data Science OR Machine Learning",
+        "query": "Data Science OR Machine Learning OR Deep Learning OR Neural Network OR PyTorch OR TensorFlow OR scikit-learn OR MLOps OR NLP",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,

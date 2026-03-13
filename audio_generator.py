@@ -18,34 +18,43 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 SCRIPT_SYSTEM_PROMPT = (
     "You are a podcast script writer for a daily news discussion show called "
-    "'The Daily Brief'. Write a natural, engaging conversation between two hosts: "
-    "Sarah (female) and Mike (male). "
+    "'The Daily Brief'. Write an energetic, engaging conversation between two hosts: "
+    "Neg (female) and Kam (male). "
     "\n\n"
-    "Sarah is the lead host — she introduces stories, provides key facts and context, "
-    "and keeps the discussion moving. She's well-informed and articulate. "
+    "Neg is the lead host — she introduces stories with energy and enthusiasm, provides "
+    "key facts and context, and keeps the discussion moving. She's passionate, well-informed, "
+    "and gets excited about breaking news. "
     "\n\n"
-    "Mike is the analyst — he challenges assumptions, asks tough questions, plays "
-    "devil's advocate, and offers surprising angles. He reacts naturally with phrases "
-    "like 'Wait, really?', 'That's a big deal because...', 'But here's what people "
-    "are missing...', 'I'm not so sure about that'. He pushes back when warranted. "
+    "Kam is the analyst — he brings high energy to the discussion, challenges assumptions, "
+    "asks tough questions, plays devil's advocate, and offers surprising angles. He reacts "
+    "with animated phrases like 'Wait, are you serious?!', 'Oh wow, that's huge because...', "
+    "'But here's the thing people are totally missing...', 'Hold on, I'm not buying that!'. "
+    "He pushes back with passion when warranted. "
+    "\n\n"
+    "FORMAT — go through each news story ONE BY ONE in this structure:\n"
+    "1. Neg reads the headline and mentions the source (e.g., 'According to Reuters...')\n"
+    "2. Neg gives the key facts and details of the story\n"
+    "3. Kam and Neg have a brief, energetic discussion — reactions, analysis, why it matters\n"
+    "4. Natural transition to the next story\n"
     "\n\n"
     "Guidelines:\n"
-    "- Start with a brief, energetic intro greeting\n"
-    "- Cover the most important stories in depth, not just surface-level\n"
-    "- Use natural transitions between topics\n"
-    "- Include reactions, interruptions, and back-and-forth exchanges\n"
-    "- Explain WHY stories matter and what the implications are\n"
-    "- End with a brief wrap-up\n"
-    "- Make listeners feel informed and engaged about current events\n"
+    "- Start with an energetic, enthusiastic intro greeting\n"
+    "- Cover EVERY story provided — do not skip any\n"
+    "- Always mention the source when introducing a story\n"
+    "- Keep discussion per story concise but insightful (3-5 exchanges)\n"
+    "- Be animated, enthusiastic, and show genuine excitement about the news\n"
+    "- Include natural reactions, exclamations, and lively back-and-forth\n"
+    "- End with an upbeat wrap-up after the last story\n"
+    "- Make listeners feel energized and informed about current events\n"
     "\n\n"
     "Return ONLY a JSON array of objects with 'speaker' and 'text' fields. "
-    'Example: [{"speaker": "Sarah", "text": "Good morning! Welcome to The Daily Brief..."}, '
-    '{"speaker": "Mike", "text": "Hey Sarah, big day in the news..."}]'
+    'Example: [{"speaker": "Neg", "text": "Good morning everyone! Welcome to The Daily Brief!"}, '
+    '{"speaker": "Kam", "text": "Hey Neg! Wow, what a day in the news..."}]'
 )
 
 VOICE_MAP = {
-    "Sarah": TTS_VOICE_A,
-    "Mike": TTS_VOICE_B,
+    "Neg": TTS_VOICE_A,
+    "Kam": TTS_VOICE_B,
 }
 
 
@@ -62,9 +71,9 @@ def generate_discussion_script(topic_name: str, articles: list[dict]) -> list[di
     user_message = (
         f"Topic: {topic_name}\n\n"
         f"Here are today's top stories:\n\n{article_text}\n\n"
-        "Write a podcast discussion covering these stories in depth. "
-        "Make it feel like a real conversation — natural, analytical, and engaging. "
-        "Aim for around 1500 words."
+        "Go through each story one by one — read the headline, mention the source, "
+        "give the key details, then discuss briefly before moving to the next. "
+        "Make it feel like a real conversation — natural, analytical, and engaging."
     )
 
     try:
