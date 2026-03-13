@@ -1,6 +1,7 @@
 import logging
 import os
 import smtplib
+from email.mime.audio import MIMEAudio
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -24,7 +25,7 @@ PERSPECTIVE_COLORS = {
 
 
 def build_email_html(topic_name: str, perspectives: dict[str, list[dict]],
-                     generated_at: str) -> str:
+                     generated_at: str, has_audio: bool = False) -> str:
     """Render the HTML email template for a single topic."""
     env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=True)
     template = env.get_template("email_template.html")
@@ -37,22 +38,33 @@ def build_email_html(topic_name: str, perspectives: dict[str, list[dict]],
         perspective_colors=PERSPECTIVE_COLORS,
         generated_at=generated_at,
         has_articles=has_articles,
+        has_audio=has_audio,
     )
 
 
-def send_email(subject: str, html_body: str, recipients=None) -> None:
-    """Send an HTML email via Gmail SMTP."""
+def send_email(subject: str, html_body: str, recipients=None,
+               audio_attachments: list[tuple[str, bytes]] | None = None) -> None:
+    """Send an HTML email via Gmail SMTP.
+
+    audio_attachments: list of (filename, mp3_bytes) tuples to attach.
+    """
     to_list = recipients or EMAIL_RECIPIENT
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart("mixed")
     msg["From"] = GMAIL_ADDRESS
     msg["To"] = ", ".join(to_list)
     msg["Subject"] = subject
 
     msg.attach(MIMEText(html_body, "html"))
 
+    for filename, mp3_bytes in (audio_attachments or []):
+        audio_part = MIMEAudio(mp3_bytes, _subtype="mpeg")
+        audio_part.add_header("Content-Disposition", "attachment", filename=filename)
+        msg.attach(audio_part)
+
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
         server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
         server.sendmail(GMAIL_ADDRESS, to_list, msg.as_string())
 
-    logger.info("Email sent: %s", subject)
+    logger.info("Email sent: %s (attachments: %d)", subject,
+                len(audio_attachments or []))
