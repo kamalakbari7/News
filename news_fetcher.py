@@ -285,4 +285,10 @@ def fetch_articles(topic: dict) -> dict[str, list[dict]]:
                         perspective, len(results[perspective]), len(capped), max_per_source)
         results[perspective] = capped
 
+    # Cap total articles per perspective to keep email under Gmail's ~102KB clip limit
+    max_per_perspective = 5
+    for perspective in results:
+        if len(results[perspective]) > max_per_perspective:
+            results[perspective] = results[perspective][:max_per_perspective]
+
     return results
