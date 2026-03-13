@@ -4,4 +4,5 @@ services:
     env_file: .env
     volumes:
       - ./logs:/app/logs
+      - /var/www/podcasts:/var/www/podcasts
     restart: "no"

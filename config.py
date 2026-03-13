@@ -139,6 +139,9 @@ TTS_MODEL = "tts-1"
 TTS_VOICE_A = "alloy"
 TTS_VOICE_B = "onyx"
 PODCAST_MAX_ARTICLES = 10
+PODCAST_DIR = os.environ.get("PODCAST_DIR", "/var/www/podcasts")
+PODCAST_BASE_URL = os.environ.get("PODCAST_BASE_URL", "http://65.109.218.149/podcasts")
+PODCAST_KEEP_DAYS = 7
 
 # Scheduling
 TIMEZONE = "America/Toronto"
