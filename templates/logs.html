@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Run Logs - News Agent{% endblock %}
+
+{% block content %}
+<h2>Run Logs</h2>
+
+{% if runs %}
+<table>
+    <thead>
+        <tr>
+            <th>Started</th>
+            <th>Finished</th>
+            <th>Status</th>
+            <th>Topics</th>
+            <th>Error</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for run in runs %}
+        <tr>
+            <td>{{ run.started_at }}</td>
+            <td>{{ run.finished_at or '-' }}</td>
+            <td><span class="status-badge status-{{ run.status }}">{{ run.status }}</span></td>
+            <td>{{ run.topics_processed or 0 }}</td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ run.error_message or '-' }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No runs recorded yet.</p>
+{% endif %}
+{% endblock %}

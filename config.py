@@ -23,15 +23,15 @@ def validate_config():
         sys.exit(1)
 
 
-validate_config()
-
-# API Keys
-NEWSAPI_KEY = os.environ["NEWSAPI_KEY"]
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+# API Keys — accessed via os.environ.get() so the web UI can import
+# this module without all env vars being set. validate_config() is
+# called at the start of main.run() before these are actually needed.
+NEWSAPI_KEY = os.environ.get("NEWSAPI_KEY", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 # Email
-GMAIL_ADDRESS = os.environ["GMAIL_ADDRESS"]
-GMAIL_APP_PASSWORD = os.environ["GMAIL_APP_PASSWORD"]
+GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 EMAIL_RECIPIENT = [
     addr.strip()
     for addr in os.environ.get("EMAIL_RECIPIENT", GMAIL_ADDRESS).split(",")

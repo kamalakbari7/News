@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if topic else 'New' }} Topic - News Agent{% endblock %}
+
+{% block content %}
+<h2>{{ 'Edit' if topic else 'New' }} Topic</h2>
+
+<form method="post">
+    <label for="name">Topic Name</label>
+    <input type="text" id="name" name="name" value="{{ topic.name if topic else '' }}" required placeholder="e.g. Iran, Football, AI & Machine Learning">
+
+    <label for="query">Search Query</label>
+    <textarea id="query" name="query" rows="3" required placeholder="e.g. Artificial Intelligence OR Machine Learning OR Deep Learning">{{ topic.query if topic else '' }}</textarea>
+    <small>Use OR to separate terms. Example: Football OR Soccer OR Premier League</small>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div>
+            <label for="sort_by">Sort By</label>
+            <select id="sort_by" name="sort_by">
+                <option value="popularity" {{ 'selected' if not topic or topic.sort_by == 'popularity' }}>Popularity</option>
+                <option value="relevancy" {{ 'selected' if topic and topic.sort_by == 'relevancy' }}>Relevancy</option>
+                <option value="publishedAt" {{ 'selected' if topic and topic.sort_by == 'publishedAt' }}>Published Date</option>
+            </select>
+        </div>
+        <div>
+            <label for="language">Language</label>
+            <select id="language" name="language">
+                <option value="en" {{ 'selected' if not topic or topic.language == 'en' }}>English</option>
+                <option value="fa" {{ 'selected' if topic and topic.language == 'fa' }}>Farsi</option>
+                <option value="fr" {{ 'selected' if topic and topic.language == 'fr' }}>French</option>
+                <option value="de" {{ 'selected' if topic and topic.language == 'de' }}>German</option>
+                <option value="es" {{ 'selected' if topic and topic.language == 'es' }}>Spanish</option>
+                <option value="ar" {{ 'selected' if topic and topic.language == 'ar' }}>Arabic</option>
+            </select>
+        </div>
+        <div>
+            <label for="page_size">Max Articles</label>
+            <input type="number" id="page_size" name="page_size" value="{{ topic.page_size if topic else 20 }}" min="1" max="100">
+        </div>
+    </div>
+
+    <label for="recipients">Email Recipients</label>
+    <textarea id="recipients" name="recipients" rows="3" placeholder="one email per line">{{ (topic.recipients or []) | join('\n') if topic else '' }}</textarea>
+    <small>One email address per line. Leave empty to use the default Gmail address.</small>
+
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button type="submit">{{ 'Update' if topic else 'Create' }} Topic</button>
+        <a href="{{ url_for('topics_list') }}" role="button" class="outline secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

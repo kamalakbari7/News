@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - News Agent{% endblock %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h4>Topics</h4>
+        <p style="font-size: 2rem; margin: 0;">{{ topics | length }}</p>
+        <a href="{{ url_for('topics_list') }}">Manage</a>
+    </div>
+    <div class="card">
+        <h4>Schedules</h4>
+        <p style="font-size: 2rem; margin: 0;">{{ schedules | length }}</p>
+        <a href="{{ url_for('schedule') }}">Manage</a>
+    </div>
+    <div class="card">
+        <h4>Quick Action</h4>
+        <form method="post" action="{{ url_for('run_now') }}" style="margin: 0;">
+            <button type="submit" class="outline">Run Now</button>
+        </form>
+    </div>
+</div>
+
+<h3>Recent Runs</h3>
+{% if recent_runs %}
+<table>
+    <thead>
+        <tr>
+            <th>Started</th>
+            <th>Status</th>
+            <th>Topics</th>
+            <th>Finished</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for run in recent_runs %}
+        <tr>
+            <td>{{ run.started_at }}</td>
+            <td><span class="status-badge status-{{ run.status }}">{{ run.status }}</span></td>
+            <td>{{ run.topics_processed or 0 }}</td>
+            <td>{{ run.finished_at or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No runs yet.</p>
+{% endif %}
+
+<h3>Active Topics</h3>
+{% if topics %}
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Recipients</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for topic in topics %}
+        <tr>
+            <td>{{ topic.name }}</td>
+            <td>{{ (topic.recipients or []) | join(', ') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No topics configured. <a href="{{ url_for('topic_new') }}">Add one</a>.</p>
+{% endif %}
+{% endblock %}

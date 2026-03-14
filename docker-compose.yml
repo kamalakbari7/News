@@ -2,7 +2,10 @@ services:
   news-agent:
     build: .
     env_file: .env
+    ports:
+      - "127.0.0.1:5000:5000"
     volumes:
       - ./logs:/app/logs
+      - ./data:/app/data
       - /var/www/podcasts:/var/www/podcasts
-    restart: "no"
+    restart: unless-stopped

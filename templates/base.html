@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}News Agent{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <style>
+        nav ul { list-style: none; display: flex; gap: 1rem; padding: 0; margin: 0; flex-wrap: wrap; }
+        nav ul li a { text-decoration: none; }
+        .flash { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+        .flash.success { background: #2d6a4f; color: #fff; }
+        .flash.error { background: #9d0208; color: #fff; }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; }
+        .status-running { background: #e9c46a; color: #000; }
+        .status-success { background: #2d6a4f; color: #fff; }
+        .status-error { background: #9d0208; color: #fff; }
+        .card { border: 1px solid var(--pico-muted-border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+        .actions { display: flex; gap: 0.5rem; align-items: center; }
+        table { font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <nav>
+            <ul>
+                <li><strong>News Agent</strong></li>
+            </ul>
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('topics_list') }}">Topics</a></li>
+                <li><a href="{{ url_for('schedule') }}">Schedule</a></li>
+                <li><a href="{{ url_for('logs') }}">Logs</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

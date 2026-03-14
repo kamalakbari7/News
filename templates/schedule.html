@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Schedule - News Agent{% endblock %}
+
+{% block content %}
+<h2>Schedule</h2>
+<p>Configure when the news agent runs. Times are in the selected timezone.</p>
+
+{% if schedules %}
+<table>
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Timezone</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in schedules %}
+        <tr>
+            <td>{{ '%02d:%02d' | format(s.hour, s.minute) }}</td>
+            <td>{{ s.timezone }}</td>
+            <td>
+                <form method="post" action="{{ url_for('schedule_delete', schedule_id=s.id) }}" style="margin: 0;" onsubmit="return confirm('Remove this schedule?')">
+                    <button type="submit" class="outline" style="padding: 4px 12px; font-size: 0.85em; --pico-color: #e63946; --pico-border-color: #e63946;">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No schedules configured. The agent will not run automatically.</p>
+{% endif %}
+
+<h3>Add Schedule</h3>
+<form method="post" style="max-width: 500px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 1rem;">
+        <div>
+            <label for="hour">Hour (0-23)</label>
+            <input type="number" id="hour" name="hour" min="0" max="23" value="6" required>
+        </div>
+        <div>
+            <label for="minute">Minute</label>
+            <input type="number" id="minute" name="minute" min="0" max="59" value="0" required>
+        </div>
+        <div>
+            <label for="timezone">Timezone</label>
+            <select id="timezone" name="timezone">
+                <option value="America/Toronto" selected>America/Toronto</option>
+                <option value="America/New_York">America/New_York</option>
+                <option value="America/Los_Angeles">America/Los_Angeles</option>
+                <option value="America/Chicago">America/Chicago</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="Asia/Tehran">Asia/Tehran</option>
+                <option value="UTC">UTC</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" style="margin-top: 1rem;">Add Schedule</button>
+</form>
+{% endblock %}
