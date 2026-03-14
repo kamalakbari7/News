@@ -6,7 +6,6 @@ from openai import APIConnectionError, APIError, OpenAI, RateLimitError
 from config import (
     OPENAI_API_KEY,
     OPENAI_MODEL,
-    PODCAST_MAX_ARTICLES,
     TTS_MODEL,
     TTS_VOICE_A,
     TTS_VOICE_B,
@@ -60,12 +59,10 @@ VOICE_MAP = {
 
 def generate_discussion_script(topic_name: str, articles: list[dict]) -> list[dict]:
     """Generate a two-host discussion script from article summaries."""
-    limited = articles[:PODCAST_MAX_ARTICLES]
-
     article_text = "\n\n".join(
         f"- {a.get('title', 'No Title')} ({a.get('source', 'Unknown')}): "
         f"{a.get('summary', a.get('description', ''))}"
-        for a in limited
+        for a in articles
     )
 
     user_message = (
@@ -83,7 +80,7 @@ def generate_discussion_script(topic_name: str, articles: list[dict]) -> list[di
                 {"role": "system", "content": SCRIPT_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ],
-            max_tokens=4000,
+            max_tokens=12000,
             temperature=0.7,
         )
         content = response.choices[0].message.content.strip()
@@ -144,7 +141,7 @@ def generate_podcast(topic_name: str, articles: list[dict]) -> bytes:
         return b""
 
     logger.info("Generating discussion script for '%s' (%d articles)",
-                topic_name, min(len(articles), PODCAST_MAX_ARTICLES))
+                topic_name, len(articles))
     script = generate_discussion_script(topic_name, articles)
     if not script:
         logger.warning("Empty script for topic '%s'", topic_name)

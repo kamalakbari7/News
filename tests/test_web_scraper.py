@@ -161,9 +161,11 @@ class TestFetchFromHackerNews:
 
 
 class TestFetchFromWebSources:
+    @patch("web_scraper._query_matches_google_news_sites", return_value=[])
+    @patch("web_scraper._query_matches_topic_feeds", return_value=[])
     @patch("web_scraper._fetch_from_hacker_news", return_value=[])
     @patch("web_scraper._fetch_rss_for_site")
-    def test_combines_results_from_sites(self, mock_rss, mock_hn):
+    def test_combines_results_from_sites(self, mock_rss, mock_hn, mock_topics, mock_gn):
         mock_rss.return_value = [
             {"title": "RSS Article", "url": "https://example.com/1",
              "source": {"name": "Test"}, "description": "D", "content": "C", "publishedAt": ""},
@@ -175,9 +177,12 @@ class TestFetchFromWebSources:
         assert len(result) == num_sites
         assert mock_rss.call_count == num_sites
 
+    @patch("web_scraper._query_matches_google_news_sites", return_value=[])
+    @patch("web_scraper._query_matches_topic_feeds", return_value=[])
     @patch("web_scraper._fetch_from_hacker_news")
     @patch("web_scraper._fetch_rss_for_site")
-    def test_one_site_failure_doesnt_affect_others(self, mock_rss, mock_hn):
+    def test_one_site_failure_doesnt_affect_others(self, mock_rss, mock_hn,
+                                                    mock_topics, mock_gn):
         from web_scraper import SITE_RSS_FEEDS
         num_sites = len(SITE_RSS_FEEDS)
         side_effects = [Exception("Site 1 down")]
@@ -191,9 +196,11 @@ class TestFetchFromWebSources:
         assert len(result) == 1
         assert result[0]["title"] == "OK"
 
+    @patch("web_scraper._query_matches_google_news_sites", return_value=[])
+    @patch("web_scraper._query_matches_topic_feeds", return_value=[])
     @patch("web_scraper._fetch_from_hacker_news")
     @patch("web_scraper._fetch_rss_for_site", return_value=[])
-    def test_includes_hacker_news(self, mock_rss, mock_hn):
+    def test_includes_hacker_news(self, mock_rss, mock_hn, mock_topics, mock_gn):
         mock_hn.return_value = [
             {"title": "HN Article", "url": "https://example.com/hn",
              "source": {"name": "Hacker News"}, "description": "", "content": "", "publishedAt": ""},

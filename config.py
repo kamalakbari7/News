@@ -54,15 +54,8 @@ TOPICS = [
         "page_size": 20,
     },
     {
-        "name": "Data Science or Machine Learning",
-        "query": "Data Science OR Machine Learning OR Deep Learning OR Neural Network OR PyTorch OR TensorFlow OR scikit-learn OR MLOps OR NLP",
-        "sort_by": "popularity",
-        "language": "en",
-        "page_size": 20,
-    },
-    {
-        "name": "Artificial Intelligence",
-        "query": "Artificial Intelligence OR ChatGPT OR Large Language Model OR Generative AI OR OpenAI OR Machine Intelligence",
+        "name": "AI, Data Science & Machine Learning",
+        "query": "Artificial Intelligence OR ChatGPT OR Large Language Model OR Generative AI OR OpenAI OR Data Science OR Machine Learning OR Deep Learning OR Neural Network OR PyTorch OR TensorFlow OR MLOps OR NLP",
         "sort_by": "popularity",
         "language": "en",
         "page_size": 20,
@@ -138,7 +131,6 @@ MAX_SUMMARY_TOKENS = 200
 TTS_MODEL = "tts-1"
 TTS_VOICE_A = "alloy"
 TTS_VOICE_B = "onyx"
-PODCAST_MAX_ARTICLES = 10
 PODCAST_DIR = os.environ.get("PODCAST_DIR", "/var/www/podcasts")
 PODCAST_BASE_URL = os.environ.get("PODCAST_BASE_URL", "http://65.109.218.149/podcasts")
 PODCAST_KEEP_DAYS = 7

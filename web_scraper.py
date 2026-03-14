@@ -72,7 +72,7 @@ TOPIC_RSS_FEEDS = {
         # Esri Canada
         ("Esri Canada", "https://resources.esri.ca/news-and-updates.rss"),
     ],
-    "data science|machine learning|deep learning|neural network|mlops": [
+    "data science|machine learning|deep learning|neural network|mlops|artificial intelligence|ai|chatgpt|openai": [
         ("Towards Data Science", "https://towardsdatascience.com/feed"),
         ("ML Mastery", "https://machinelearningmastery.com/feed/"),
         ("KDnuggets", "https://feeds.feedburner.com/kdnuggets-data-mining-analytics"),
@@ -100,7 +100,7 @@ TOPIC_GOOGLE_NEWS_SITES = {
         ("Reuters Iran", "site:reuters.com Iran"),
         ("Al Jazeera Iran", "site:aljazeera.com Iran"),
     ],
-    "data science|machine learning|deep learning|neural network|mlops": [
+    "data science|machine learning|deep learning|neural network|mlops|artificial intelligence|ai|chatgpt|openai": [
         ("TechCrunch ML", "site:techcrunch.com machine learning"),
         ("VentureBeat AI", "site:venturebeat.com artificial intelligence machine learning"),
         ("Wired ML", "site:wired.com machine learning"),

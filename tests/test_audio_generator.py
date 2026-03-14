@@ -79,24 +79,6 @@ class TestGenerateDiscussionScript:
 
         assert result == []
 
-    @patch("audio_generator.client")
-    def test_limits_articles_to_max(self, mock_client):
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = json.dumps(SAMPLE_SCRIPT)
-        mock_client.chat.completions.create.return_value = mock_response
-
-        many_articles = [{"title": f"Art {i}", "source": "X", "summary": f"Sum {i}"}
-                         for i in range(20)]
-
-        from audio_generator import generate_discussion_script
-        generate_discussion_script("Test Topic", many_articles)
-
-        call_args = mock_client.chat.completions.create.call_args
-        user_msg = call_args.kwargs["messages"][1]["content"]
-        # Should only include PODCAST_MAX_ARTICLES (10) articles
-        assert user_msg.count("- Art ") == 10
-
 
 class TestGenerateAudio:
     @patch("audio_generator.client")
