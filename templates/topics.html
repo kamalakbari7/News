@@ -4,7 +4,7 @@
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <h2>Topics</h2>
-    <a href="{{ url_for('topic_new') }}" role="button">Add Topic</a>
+    <a href="{{ url_for('main.topic_new') }}" role="button">Add Topic</a>
 </div>
 
 {% if topics %}
@@ -27,8 +27,8 @@
             <td>{{ (topic.recipients or []) | length }}</td>
             <td>
                 <div class="actions">
-                    <a href="{{ url_for('topic_edit', topic_id=topic.id) }}" role="button" class="outline secondary" style="padding: 4px 12px; font-size: 0.85em;">Edit</a>
-                    <form method="post" action="{{ url_for('topic_delete', topic_id=topic.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this topic?')">
+                    <a href="{{ url_for('main.topic_edit', topic_id=topic.id) }}" role="button" class="outline secondary" style="padding: 4px 12px; font-size: 0.85em;">Edit</a>
+                    <form method="post" action="{{ url_for('main.topic_delete', topic_id=topic.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this topic?')">
                         <button type="submit" class="outline" style="padding: 4px 12px; font-size: 0.85em; --pico-color: #e63946; --pico-border-color: #e63946;">Delete</button>
                     </form>
                 </div>

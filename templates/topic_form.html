@@ -44,7 +44,7 @@
 
     <div style="display: flex; gap: 1rem; margin-top: 1rem;">
         <button type="submit">{{ 'Update' if topic else 'Create' }} Topic</button>
-        <a href="{{ url_for('topics_list') }}" role="button" class="outline secondary">Cancel</a>
+        <a href="{{ url_for('main.topics_list') }}" role="button" class="outline secondary">Cancel</a>
     </div>
 </form>
 {% endblock %}

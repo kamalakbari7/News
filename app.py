@@ -5,10 +5,10 @@ from functools import wraps
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import (
+    Blueprint, Flask, flash, redirect, render_template, request, session, url_for,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 import db
 
@@ -16,23 +16,15 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-me-in-production")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-
-# Support running behind nginx at /news/
-SCRIPT_NAME = os.environ.get("SCRIPT_NAME", "")
-if SCRIPT_NAME:
-    app.config["APPLICATION_ROOT"] = SCRIPT_NAME
-    from werkzeug.middleware.dispatcher import DispatcherMiddleware
-    app.wsgi_app = DispatcherMiddleware(
-        lambda e, s: s("404 Not Found", [])([b""]),
-        {SCRIPT_NAME: app.wsgi_app},
-    )
 
 ADMIN_PASSWORD_HASH = generate_password_hash(
     os.environ.get("ADMIN_PASSWORD", "admin")
 )
 
 scheduler = BackgroundScheduler()
+
+# All routes live under /news so nginx can proxy /news/ without stripping
+bp = Blueprint("main", __name__, url_prefix="/news")
 
 
 # --- Auth ---
@@ -41,31 +33,31 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get("authenticated"):
-            return redirect(url_for("login"))
+            return redirect(url_for("main.login"))
         return f(*args, **kwargs)
     return decorated
 
 
-@app.route("/login", methods=["GET", "POST"])
+@bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         password = request.form.get("password", "")
         if check_password_hash(ADMIN_PASSWORD_HASH, password):
             session["authenticated"] = True
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("main.dashboard"))
         flash("Invalid password.", "error")
     return render_template("login.html")
 
 
-@app.route("/logout")
+@bp.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
 # --- Dashboard ---
 
-@app.route("/")
+@bp.route("/")
 @login_required
 def dashboard():
     topics = db.get_topics()
@@ -81,47 +73,47 @@ def dashboard():
 
 # --- Topics ---
 
-@app.route("/topics")
+@bp.route("/topics")
 @login_required
 def topics_list():
     topics = db.get_topics()
     return render_template("topics.html", topics=topics)
 
 
-@app.route("/topics/new", methods=["GET", "POST"])
+@bp.route("/topics/new", methods=["GET", "POST"])
 @login_required
 def topic_new():
     if request.method == "POST":
         data = _parse_topic_form(request.form)
         db.save_topic(data)
         flash("Topic created.", "success")
-        return redirect(url_for("topics_list"))
+        return redirect(url_for("main.topics_list"))
     return render_template("topic_form.html", topic=None)
 
 
-@app.route("/topics/<int:topic_id>/edit", methods=["GET", "POST"])
+@bp.route("/topics/<int:topic_id>/edit", methods=["GET", "POST"])
 @login_required
 def topic_edit(topic_id):
     topic = db.get_topic(topic_id)
     if not topic:
         flash("Topic not found.", "error")
-        return redirect(url_for("topics_list"))
+        return redirect(url_for("main.topics_list"))
 
     if request.method == "POST":
         data = _parse_topic_form(request.form)
         db.save_topic(data, topic_id=topic_id)
         flash("Topic updated.", "success")
-        return redirect(url_for("topics_list"))
+        return redirect(url_for("main.topics_list"))
 
     return render_template("topic_form.html", topic=topic)
 
 
-@app.route("/topics/<int:topic_id>/delete", methods=["POST"])
+@bp.route("/topics/<int:topic_id>/delete", methods=["POST"])
 @login_required
 def topic_delete(topic_id):
     db.delete_topic(topic_id)
     flash("Topic deleted.", "success")
-    return redirect(url_for("topics_list"))
+    return redirect(url_for("main.topics_list"))
 
 
 def _parse_topic_form(form):
@@ -139,7 +131,7 @@ def _parse_topic_form(form):
 
 # --- Schedule ---
 
-@app.route("/schedule", methods=["GET", "POST"])
+@bp.route("/schedule", methods=["GET", "POST"])
 @login_required
 def schedule():
     if request.method == "POST":
@@ -149,24 +141,24 @@ def schedule():
         db.save_schedule(hour, minute, timezone)
         rebuild_scheduler()
         flash("Schedule added.", "success")
-        return redirect(url_for("schedule"))
+        return redirect(url_for("main.schedule"))
 
     schedules = db.get_schedules()
     return render_template("schedule.html", schedules=schedules)
 
 
-@app.route("/schedule/<int:schedule_id>/delete", methods=["POST"])
+@bp.route("/schedule/<int:schedule_id>/delete", methods=["POST"])
 @login_required
 def schedule_delete(schedule_id):
     db.delete_schedule(schedule_id)
     rebuild_scheduler()
     flash("Schedule removed.", "success")
-    return redirect(url_for("schedule"))
+    return redirect(url_for("main.schedule"))
 
 
 # --- Logs ---
 
-@app.route("/logs")
+@bp.route("/logs")
 @login_required
 def logs():
     recent_runs = db.get_recent_runs(20)
@@ -178,12 +170,12 @@ def logs():
 _run_lock = threading.Lock()
 
 
-@app.route("/run-now", methods=["POST"])
+@bp.route("/run-now", methods=["POST"])
 @login_required
 def run_now():
     if _run_lock.locked():
         flash("A run is already in progress.", "error")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
 
     def _background_run():
         with _run_lock:
@@ -196,7 +188,17 @@ def run_now():
     thread = threading.Thread(target=_background_run, daemon=True)
     thread.start()
     flash("News agent run started in background.", "success")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("main.dashboard"))
+
+
+# Register blueprint
+app.register_blueprint(bp)
+
+
+# Redirect bare / to /news/
+@app.route("/")
+def index():
+    return redirect(url_for("main.dashboard"))
 
 
 # --- Scheduler ---

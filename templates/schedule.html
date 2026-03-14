@@ -20,7 +20,7 @@
             <td>{{ '%02d:%02d' | format(s.hour, s.minute) }}</td>
             <td>{{ s.timezone }}</td>
             <td>
-                <form method="post" action="{{ url_for('schedule_delete', schedule_id=s.id) }}" style="margin: 0;" onsubmit="return confirm('Remove this schedule?')">
+                <form method="post" action="{{ url_for('main.schedule_delete', schedule_id=s.id) }}" style="margin: 0;" onsubmit="return confirm('Remove this schedule?')">
                     <button type="submit" class="outline" style="padding: 4px 12px; font-size: 0.85em; --pico-color: #e63946; --pico-border-color: #e63946;">Remove</button>
                 </form>
             </td>

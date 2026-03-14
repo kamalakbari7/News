@@ -8,16 +8,16 @@
     <div class="card">
         <h4>Topics</h4>
         <p style="font-size: 2rem; margin: 0;">{{ topics | length }}</p>
-        <a href="{{ url_for('topics_list') }}">Manage</a>
+        <a href="{{ url_for('main.topics_list') }}">Manage</a>
     </div>
     <div class="card">
         <h4>Schedules</h4>
         <p style="font-size: 2rem; margin: 0;">{{ schedules | length }}</p>
-        <a href="{{ url_for('schedule') }}">Manage</a>
+        <a href="{{ url_for('main.schedule') }}">Manage</a>
     </div>
     <div class="card">
         <h4>Quick Action</h4>
-        <form method="post" action="{{ url_for('run_now') }}" style="margin: 0;">
+        <form method="post" action="{{ url_for('main.run_now') }}" style="margin: 0;">
             <button type="submit" class="outline">Run Now</button>
         </form>
     </div>
@@ -68,6 +68,6 @@
     </tbody>
 </table>
 {% else %}
-<p>No topics configured. <a href="{{ url_for('topic_new') }}">Add one</a>.</p>
+<p>No topics configured. <a href="{{ url_for('main.topic_new') }}">Add one</a>.</p>
 {% endif %}
 {% endblock %}
