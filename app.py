@@ -8,12 +8,25 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 import db
 
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-me-in-production")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+# Support running behind nginx at /news/
+SCRIPT_NAME = os.environ.get("SCRIPT_NAME", "")
+if SCRIPT_NAME:
+    app.config["APPLICATION_ROOT"] = SCRIPT_NAME
+    from werkzeug.middleware.dispatcher import DispatcherMiddleware
+    app.wsgi_app = DispatcherMiddleware(
+        lambda e, s: s("404 Not Found", [])([b""]),
+        {SCRIPT_NAME: app.wsgi_app},
+    )
 
 ADMIN_PASSWORD_HASH = generate_password_hash(
     os.environ.get("ADMIN_PASSWORD", "admin")
